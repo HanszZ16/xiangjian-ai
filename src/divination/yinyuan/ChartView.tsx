@@ -105,7 +105,7 @@ export function YinyuanChartView({ chart }: { chart: YinyuanChart }) {
       </div>
       {chart.warnings.length > 0 && (
         <ul className="mt-5 space-y-1.5 border-t border-[var(--line)] pt-4">
-          {chart.warnings.map((w) => <li key={w} className="text-[11.5px] leading-relaxed text-[var(--fg-faint)]">· {w}</li>)}
+          {chart.warnings.map((w, i) => <li key={`${i}-${w}`} className="text-[11.5px] leading-relaxed text-[var(--fg-faint)]">· {w}</li>)}
         </ul>
       )}
     </div>

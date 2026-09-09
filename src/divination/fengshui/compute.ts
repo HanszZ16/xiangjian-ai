@@ -53,15 +53,20 @@ const DIRECTION_GUA: Record<Direction, GuaName> = {
 const GUA_NUMBER: Record<number, GuaName> = { 1: '坎', 2: '坤', 3: '震', 4: '巽', 6: '乾', 7: '兑', 8: '艮', 9: '离' }
 const EAST_GUA = new Set<GuaName>(['坎', '离', '震', '巽'])
 
-const HOUSE_MAP: Record<GuaName, Record<string, Direction>> = {
-  坎: { 生气: '东南', 延年: '南', 天医: '东', 伏位: '北', 祸害: '西', 六煞: '东北', 五鬼: '西南', 绝命: '西北' },
-  离: { 生气: '东', 延年: '北', 天医: '东南', 伏位: '南', 祸害: '西北', 六煞: '西', 五鬼: '东北', 绝命: '西南' },
-  震: { 生气: '南', 延年: '东南', 天医: '北', 伏位: '东', 祸害: '东北', 六煞: '西南', 五鬼: '西北', 绝命: '西' },
-  巽: { 生气: '北', 延年: '东', 天医: '南', 伏位: '东南', 祸害: '西南', 六煞: '西北', 五鬼: '西', 绝命: '东北' },
-  乾: { 生气: '西南', 延年: '东北', 天医: '西', 伏位: '西北', 祸害: '东南', 六煞: '北', 五鬼: '南', 绝命: '东' },
-  坤: { 生气: '西北', 延年: '西', 天医: '东北', 伏位: '西南', 祸害: '东', 六煞: '南', 五鬼: '北', 绝命: '东南' },
-  艮: { 生气: '西', 延年: '西南', 天医: '西北', 伏位: '东北', 祸害: '南', 六煞: '东', 五鬼: '东南', 绝命: '北' },
-  兑: { 生气: '东北', 延年: '西北', 天医: '西南', 伏位: '西', 祸害: '北', 六煞: '东南', 五鬼: '东', 绝命: '南' },
+/**
+ * 八宅游年：由本卦依「上爻变生气、中爻变五鬼、下爻变延年、中爻变六煞、
+ * 上爻变祸害、中爻变天医、下爻变绝命、中爻变伏位」逐爻推出。
+ * 表是对称的——甲宅的某星落在乙方，乙宅的同一星必落回甲方，compute.test.ts 会核这一条。
+ */
+export const houseStars: Record<GuaName, Record<string, Direction>> = {
+  坎: { 生气: '东南', 天医: '东', 延年: '南', 伏位: '北', 祸害: '西', 六煞: '西北', 五鬼: '东北', 绝命: '西南' },
+  离: { 生气: '东', 天医: '东南', 延年: '北', 伏位: '南', 祸害: '东北', 六煞: '西南', 五鬼: '西', 绝命: '西北' },
+  震: { 生气: '南', 天医: '北', 延年: '东南', 伏位: '东', 祸害: '西南', 六煞: '东北', 五鬼: '西北', 绝命: '西' },
+  巽: { 生气: '北', 天医: '南', 延年: '东', 伏位: '东南', 祸害: '西北', 六煞: '西', 五鬼: '西南', 绝命: '东北' },
+  乾: { 生气: '西', 天医: '东北', 延年: '西南', 伏位: '西北', 祸害: '东南', 六煞: '北', 五鬼: '东', 绝命: '南' },
+  坤: { 生气: '东北', 天医: '西', 延年: '西北', 伏位: '西南', 祸害: '东', 六煞: '南', 五鬼: '东南', 绝命: '北' },
+  艮: { 生气: '西南', 天医: '西北', 延年: '西', 伏位: '东北', 祸害: '南', 六煞: '东', 五鬼: '北', 绝命: '东南' },
+  兑: { 生气: '西北', 天医: '西南', 延年: '东北', 伏位: '西', 祸害: '北', 六煞: '东南', 五鬼: '南', 绝命: '东' },
 }
 
 const USE: Record<string, string> = {
@@ -122,7 +127,7 @@ export function computeFengshui(input: FengshuiInput): FengshuiChart {
   const residentEast = EAST_GUA.has(resident.gua)
   const period = periodOf(completedYear)
   const byDirection = Object.fromEntries(
-    Object.entries(HOUSE_MAP[houseGua]).map(([star, direction]) => [direction, star]),
+    Object.entries(houseStars[houseGua]).map(([star, direction]) => [direction, star]),
   ) as Record<Direction, string>
 
   const cells = (Object.keys(DIRECTION_GUA) as Direction[]).map((direction) => {

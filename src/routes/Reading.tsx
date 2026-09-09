@@ -126,6 +126,7 @@ function Sheet({
     return () => clearInterval(t)
   }, [state.phase])
 
+  const hasVerdicts = proofs.some((proof) => Boolean(verdicts[proof.raw]))
   const busy = state.phase === 'thinking' || state.phase === 'writing'
   const ChartView = impl.ChartView
 
@@ -147,7 +148,7 @@ function Sheet({
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center px-6 pb-16">
+    <div className="flex-1 flex flex-col items-center px-5 sm:px-8 py-10 sm:py-14">
       {/* ── 排盘中：盘在转 ── */}
       <AnimatePresence>
         {state.phase === 'thinking' && (
@@ -194,17 +195,18 @@ function Sheet({
         )}
       </AnimatePresence>
 
-      <div ref={paper} className="reading-sheet w-full max-w-[64rem] px-4 py-7 sm:px-8 sm:py-10">
+      <div ref={paper} className="reading-sheet w-full max-w-[64rem]">
         {/* ── 命盘 ── */}
         <InkReveal>
-          <div className="text-center mb-8">
-            <div className="mb-2 text-[11px] tracking-[0.3em] text-[var(--accent)]">
+          <header className="mb-9 sm:mb-12">
+            <div className="mb-3 text-[11px] tracking-[0.3em] text-[var(--accent)]">
               {mod.category ?? '观象'} · {localPreview ? '本地预览' : '已成盘'}
             </div>
-            <h1 className="glyph text-[24px] sm:text-[28px] tracking-[0.3em] indent-[0.3em] text-[var(--fg)]">
+            <h1 className="glyph text-[32px] sm:text-[36px] tracking-[0.24em] text-[var(--fg)]">
               {mod.name}
             </h1>
-          </div>
+            <p className="mt-4 text-[14px] leading-[1.9] text-[var(--fg-dim)]">{mod.tagline}</p>
+          </header>
           <div className="chart-surface p-4 sm:p-7">
             <ChartView chart={chart} />
           </div>
@@ -213,7 +215,7 @@ function Sheet({
         <Rule mark="解" />
 
         {localPreview && (
-          <div className="mx-auto mb-5 max-w-[58rem] border border-[var(--accent)]/30 bg-[var(--accent)]/[0.04] px-4 py-3 text-center text-[12px] leading-relaxed text-[var(--fg-faint)]">
+          <div className="mx-auto mb-5 max-w-[46rem] border-l-2 border-[var(--accent)]/40 pl-4 text-[12px] leading-[1.9] text-[var(--fg-dim)]">
             本地预览模式 · 命盘为真实计算，解读为界面示例，全程不读取密钥、不请求模型。
           </div>
         )}
@@ -233,9 +235,7 @@ function Sheet({
               <Seal variant="quiet" onClick={() => void open(question)}>
                 再 试
               </Seal>
-              <Link to="/settings">
-                <Seal variant="quiet">去设置</Seal>
-              </Link>
+              <Link to="/settings" className="quiet-link">去设置</Link>
             </div>
           </div>
         )}
@@ -243,17 +243,17 @@ function Sheet({
         {sections.map((s, i) => (
           <section
             key={`${s.title}-${i}`}
-            className="reading-section mb-4 px-5 py-6 sm:px-7 sm:py-7"
+            className="reading-section py-7 sm:py-9"
           >
             {s.title && (
-              <div className="mb-5 flex items-center gap-3">
-                <span className="text-[10px] tabular-nums text-[var(--fg-faint)]">
+              <div className="mb-6 flex items-center gap-3 sm:gap-4">
+                <span aria-hidden="true" className="text-[12px] tabular-nums text-[var(--accent)]">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <h2 className="glyph text-[16px] tracking-[0.28em] text-[var(--accent)]">
+                <h2 className="glyph text-[18px] tracking-[0.16em] text-[var(--fg)]">
                   {s.title}
                 </h2>
-                <span className="h-px flex-1 bg-[var(--line)]" />
+                <span aria-hidden="true" className="h-px flex-1 bg-[var(--accent)]/20" />
               </div>
             )}
             <Prose text={s.body} />
@@ -264,9 +264,9 @@ function Sheet({
                 {proofs.map((p) => (
                   <div
                     key={p.raw}
-                    className="py-3.5 border-t border-[var(--line)] last:border-b flex flex-col sm:flex-row sm:items-center gap-3"
+                    className="py-4 border-t border-[var(--line)] last:border-b flex flex-col sm:flex-row sm:items-center gap-3"
                   >
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <span className="text-[13px] text-[var(--fg-faint)] tabular-nums mr-3">
                         {p.year}
                         {p.age && `　${p.age}`}
@@ -277,13 +277,17 @@ function Sheet({
                       {(['准', '不准', '记不清'] as const).map((v) => (
                         <button
                           key={v}
+                          type="button"
+                          aria-pressed={verdicts[p.raw] === v}
                           onClick={() =>
-                            setVerdicts((s2) => ({
-                              ...s2,
-                              [p.raw]: s2[p.raw] === v ? undefined! : v,
-                            }))
+                            setVerdicts((current) => {
+                              const next = { ...current }
+                              if (next[p.raw] === v) delete next[p.raw]
+                              else next[p.raw] = v
+                              return next
+                            })
                           }
-                          className={`px-3 py-1 text-[12px] transition-all duration-300 cursor-pointer ${
+                          className={`min-h-10 px-3 py-2 text-[12px] transition-colors duration-300 cursor-pointer ${
                             verdicts[p.raw] === v
                               ? 'text-[var(--seal)] shadow-[inset_0_0_0_1px_var(--seal)]'
                               : 'text-[var(--fg-faint)] shadow-[inset_0_0_0_1px_var(--line)] hover:text-[var(--fg-dim)]'
@@ -295,7 +299,8 @@ function Sheet({
                     </div>
                   </div>
                 ))}
-                {Object.keys(verdicts).length > 0 && !busy && (
+                {/* 本地预览这一页承诺过「不请求模型」，重校要走一次流式请求，就不能出现在这里。 */}
+                {hasVerdicts && !busy && !localPreview && (
                   <div className="pt-6">
                     <Seal onClick={sendVerdicts}>据 此 重 校</Seal>
                   </div>
@@ -312,26 +317,28 @@ function Sheet({
         {/* ── 追问与留存 ── */}
         {state.phase === 'done' && (
           <InkReveal>
-            <Rule mark="问" />
-            {!localPreview && <div className="flex items-end gap-4">
+            <Rule mark={localPreview ? '存' : '问'} />
+            {!localPreview && <div className="flex items-end gap-3 sm:gap-4">
               <textarea
+                aria-label="继续追问"
                 rows={1}
                 value={ask}
                 onChange={(e) => setAsk(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && ask.trim()) {
+                  if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && ask.trim()) {
                     e.preventDefault()
                     void follow(ask.trim())
                     setAsk('')
                   }
                 }}
                 placeholder="还想问什么，接着说"
-                className="flex-1 bg-transparent border-0 border-b border-[var(--line)] py-2 text-[15px]
+                className="min-w-0 flex-1 bg-transparent border-0 border-b border-[var(--line)] py-2 text-[15px]
                            text-[var(--fg)] outline-none resize-none focus:border-[var(--accent)]
                            transition-colors duration-300 placeholder:text-[var(--fg-faint)]"
               />
               <Seal
                 variant="quiet"
+                className="shrink-0"
                 disabled={!ask.trim()}
                 onClick={() => {
                   void follow(ask.trim())
@@ -342,11 +349,9 @@ function Sheet({
               </Seal>
             </div>}
 
-            <div className="mt-12 flex flex-wrap justify-center gap-4">
+            <div className="mt-10 flex flex-wrap gap-3">
               {localPreview && (
-                <Link to={`/cast/${mod.id}`}>
-                  <Seal variant="quiet">返回调整</Seal>
-                </Link>
+                <Link to={`/cast/${mod.id}`} className="quiet-link">返回调整</Link>
               )}
               <Seal variant="quiet" onClick={() => downloadMarkdown(mod.name, chart, state.text)}>
                 存为文稿
@@ -354,11 +359,9 @@ function Sheet({
               <Seal variant="quiet" onClick={() => void downloadPng(paper.current, mod.name)}>
                 存为图卷
               </Seal>
-              <Link to="/">
-                <Seal variant="quiet">另起一盘</Seal>
-              </Link>
+              <Link to="/" className="quiet-link">另起一盘</Link>
             </div>
-            <p className="mt-8 text-center text-[12px] text-[var(--fg-faint)] leading-relaxed">
+            <p className="mt-6 text-[12px] text-[var(--fg-faint)] leading-[1.9]">
               这一页只活在此刻的浏览器里。刷新或关掉，它就散了。
             </p>
           </InkReveal>

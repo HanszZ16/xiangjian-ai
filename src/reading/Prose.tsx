@@ -27,7 +27,15 @@ function inline(text: string): ReactNode {
 }
 
 export function Prose({ text }: { text: string }) {
-  const blocks = text.split(/\n{2,}/)
+  // 模型不一定在 `### 小标题` 前后都空一行。不先把它切出来独占一块，
+  // 下面就会当成普通段落，把井号连同正文挤成一行。
+  const blocks = text
+    .split(/\n{2,}/)
+    .flatMap((b) => b.split(/\n(?=###\s)/))
+    .flatMap((b) => {
+      const head = b.match(/^(###\s+[^\n]*)\n([\s\S]+)$/)
+      return head ? [head[1], head[2]] : [b]
+    })
 
   return (
     <div className="space-y-4">

@@ -57,14 +57,20 @@ function tone(score: number): MatchTone {
 }
 
 function branchRelation(a: string, b: string) {
+  // 同支要先拦下来。三合局与三刑都是三支成组，用 includes 判断会把「同一个字出现两次」
+  // 也算成入局，于是任何同地支都被读成三合，同气与自刑两条永远走不到。
+  if (a === b) {
+    return SELF_PUNISH.includes(a)
+      ? { score: 50, label: `${a}${b}自刑` }
+      : { score: 72, label: `${a}${b}同气` }
+  }
   if (pairIn(BRANCH_COMBINES, a, b)) return { score: 92, label: `${a}${b}六合` }
   const harmony = HARMONY_GROUPS.find((group) => group.includes(a) && group.includes(b))
   if (harmony) return { score: 86, label: `${a}${b}同入${harmony}三合局` }
   if (pairIn(BRANCH_CLASHES, a, b)) return { score: 38, label: `${a}${b}相冲` }
   if (pairIn(BRANCH_HARMS, a, b)) return { score: 46, label: `${a}${b}相害` }
   const punish = PUNISH_GROUPS.find((group) => group.includes(a) && group.includes(b))
-  if (punish || (a === b && SELF_PUNISH.includes(a))) return { score: 50, label: `${a}${b}见刑` }
-  if (a === b) return { score: 72, label: `${a}${b}同气` }
+  if (punish) return { score: 50, label: `${a}${b}见刑` }
   return { score: 66, label: `${a}${b}无明显合冲` }
 }
 
@@ -89,7 +95,7 @@ function parseDate(date: string) {
   return { year, month, day }
 }
 
-function personOf(data: YinyuanInput['a'], light: boolean): MatchPerson {
+function personOf(data: YinyuanInput['a'], light: boolean, fallbackName: string): MatchPerson {
   const d = parseDate(data.date)
   const [hour, minute] = (data.time || '12:00').split(':').map(Number)
   const chart = computeBazi({
@@ -100,7 +106,8 @@ function personOf(data: YinyuanInput['a'], light: boolean): MatchPerson {
     manualLongitude: null,
     useTrueSolarTime: !light,
   })
-  return { name: data.name.trim() || (data.gender === '男' ? '甲方' : '乙方'), gender: data.gender, chart }
+  // 兜底称呼按位置给，不按性别——同性别的两个人都不填称呼时会撞成同一个名字。
+  return { name: data.name.trim() || fallbackName, gender: data.gender, chart }
 }
 
 function complementScore(a: BaziChart, b: BaziChart) {
@@ -127,8 +134,8 @@ function tierOf(score: number) {
 
 export function computeYinyuan(input: YinyuanInput): YinyuanChart {
   const light = input.mode === 'zodiac'
-  const a = personOf(input.a, light)
-  const b = personOf(input.b, light)
+  const a = personOf(input.a, light, '甲方')
+  const b = personOf(input.b, light, '乙方')
   const ay = a.chart.pillars[0]
   const by = b.chart.pillars[0]
   const yearStem = stemRelation(ay.stem, by.stem)
