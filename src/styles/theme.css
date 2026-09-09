@@ -13,15 +13,15 @@
     system-ui, -apple-system, sans-serif;
 
   /* 墨 */
-  --color-void: #07080b;
-  --color-ink: #0b0e14;
-  --color-ink-raised: #141924;
-  --color-ink-line: #232a38;
+  --color-void: #0b0d10;
+  --color-ink: #101318;
+  --color-ink-raised: #171b20;
+  --color-ink-line: #2b2d2e;
 
   /* 朱砂 · 鎏金 · 青玉 */
   --color-cinnabar: #b2413a;
   --color-cinnabar-lit: #cf5a50;
-  --color-gold: #c8a96a;
+  --color-gold: #c4aa7d;
   --color-gold-dim: #8a7647;
   --color-jade: #5b8b85;
 
@@ -36,9 +36,9 @@
   --bg: var(--color-void);
   --bg-raised: var(--color-ink-raised);
   --line: var(--color-ink-line);
-  --fg: #d9d3c5;
-  --fg-dim: #8d8778;
-  --fg-faint: #5d594f;
+  --fg: #e2dccf;
+  --fg-dim: #aba597;
+  --fg-faint: #888579;
   --accent: var(--color-gold);
   --seal: var(--color-cinnabar);
   color-scheme: dark;
@@ -51,7 +51,7 @@
   --line: #ccc0a4;
   --fg: #221e18;
   --fg-dim: #5d5546;
-  --fg-faint: #8d8571;
+  --fg-faint: #756c5c;
   --accent: #8a6d2f;
   --seal: #a8322b;
   color-scheme: light;
@@ -76,38 +76,25 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
 /* 共同表面：仍是直角宣纸，不把每一块都做成常见的圆角卡片。 */
-.module-card,
 .form-surface,
-.chart-surface,
-.reading-section {
+.chart-surface {
   background:
-    linear-gradient(135deg, color-mix(in oklab, var(--bg-raised) 72%, transparent), transparent 78%);
+    linear-gradient(135deg, color-mix(in oklab, var(--bg-raised) 42%, var(--bg)), var(--bg) 90%);
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
-.module-card::before,
 .form-surface::before,
 .chart-surface::before {
   content: "";
   display: block;
   position: absolute;
   pointer-events: none;
-}
-
-.module-card {
-  transition: transform 500ms var(--ease-silk), box-shadow 500ms var(--ease-silk), background 500ms var(--ease-silk);
-}
-
-.module-card:hover,
-.module-card:focus-visible {
-  transform: translateY(-3px);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 55%, var(--line)), 0 18px 50px rgb(0 0 0 / 12%);
-  outline: none;
 }
 
 .form-surface,
@@ -125,16 +112,11 @@ textarea {
 }
 
 .reading-sheet {
-  background: color-mix(in oklab, var(--bg) 88%, var(--bg-raised));
-  box-shadow: 0 28px 100px rgb(0 0 0 / 18%);
+  background: var(--bg);
 }
 
 .reading-section {
-  transition: border-color 400ms var(--ease-silk);
-}
-
-.reading-section:hover {
-  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--accent) 55%, transparent), inset 0 0 0 1px var(--line);
+  scroll-margin-top: 6rem;
 }
 
 * {
@@ -170,6 +152,311 @@ body::before {
   font-family: var(--font-serif);
   font-variant-east-asian: traditional;
   letter-spacing: 0;
+}
+
+/* 让可读文字与低对比装饰各司其职。 */
+a, button, input, textarea, select, summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus-visible, button:focus-visible, summary:focus-visible,
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 5px;
+}
+
+label:has(input.sr-only:focus-visible) {
+  outline: 1px solid var(--accent);
+  outline-offset: 6px;
+}
+
+button:not(:disabled), summary { cursor: pointer; }
+input, textarea, select { border-radius: 0; }
+input[type="date"], input[type="time"] { min-width: 0; }
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 1rem;
+  z-index: 60;
+  padding: 0.5rem 1rem;
+  background: var(--bg-raised);
+  color: var(--accent);
+  transform: translateY(-150%);
+}
+.skip-link:focus { transform: translateY(0); }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
+  background: color-mix(in oklab, var(--bg) 88%, transparent);
+  backdrop-filter: blur(20px);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 90rem;
+  min-height: 4.5rem;
+  margin: 0 auto;
+  padding: 0 3.5rem;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--fg);
+  font-size: 1.0625rem;
+}
+.brand > .glyph:last-child { letter-spacing: 0.22em; }
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.8rem;
+  border: 1px solid color-mix(in oklab, var(--seal) 80%, transparent);
+  color: var(--seal);
+  font-size: 1rem;
+}
+.header-nav { display: flex; align-items: stretch; gap: 2.5rem; }
+.header-nav a {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 4.5rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.16em;
+  color: var(--fg-faint);
+  transition: color 250ms;
+}
+.header-nav a:hover, .header-nav a.active { color: var(--accent); }
+.header-nav a.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  width: 50%;
+  height: 1px;
+  background: var(--accent);
+}
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 3.5rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
+  color: var(--fg-faint);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+}
+.footer-principles { display: flex; align-items: center; gap: 1rem; }
+.footer-principles > span { color: var(--accent); opacity: 0.5; }
+
+/* 五卷并列：以一张安静的书案承接罗盘。 */
+.home-page {
+  position: relative;
+  isolation: isolate;
+  flex: 1;
+  padding: 0 3.5rem;
+  overflow: clip;
+}
+.home-atmosphere {
+  position: absolute;
+  z-index: -1;
+  inset: -5rem 0 auto;
+  height: 40rem;
+  pointer-events: none;
+  opacity: 0.5;
+  mask-image: linear-gradient(to bottom, #000 20%, transparent 92%);
+}
+.home-hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  max-width: 74rem;
+  min-height: 19.5rem;
+  margin: 0 auto;
+  text-align: center;
+}
+.hero-luopan {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  opacity: 0.32;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  mask-image: radial-gradient(circle, transparent 22%, #000 48%);
+}
+.hero-copy { position: relative; padding: 2rem 0; }
+.hero-eyebrow {
+  margin-bottom: 1.15rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+}
+.hero-title-row { position: relative; width: fit-content; margin: auto; }
+.glyph.hero-title {
+  font-size: 4.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+}
+.hero-seal {
+  position: absolute;
+  left: calc(100% + 0.8rem);
+  top: 0.6rem;
+  padding: 0.25rem 0.2rem;
+  border: 1px solid var(--seal);
+  color: var(--seal);
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+.hero-description {
+  margin-top: 1.65rem;
+  color: var(--fg-dim);
+  font-size: 0.9375rem;
+  letter-spacing: 0.15em;
+}
+.hero-marginal {
+  position: absolute;
+  top: 5.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  color: var(--fg-faint);
+  font-size: 0.75rem;
+}
+.hero-marginal-left { left: 1rem; }
+.hero-marginal-right { right: 1rem; }
+.marginal-line { width: 1px; height: 5.5rem; background: linear-gradient(var(--line), transparent); }
+.hero-marginal-right .marginal-line { transform: rotate(180deg); }
+.home-collection { position: relative; max-width: 74rem; margin: 0 auto; }
+.collection-heading {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: var(--fg-faint);
+}
+.collection-heading h2 { font-weight: 400; color: var(--fg-dim); }
+.collection-rule { height: 1px; flex: 1; background: var(--line); }
+.collection-note { letter-spacing: 0.08em; }
+.module-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.75rem; }
+.module-grid > div { min-width: 0; }
+.module-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 16.5rem;
+  padding: 1.35rem 1.4rem 1.15rem;
+  border: 1px solid var(--line);
+  background: linear-gradient(150deg, color-mix(in oklab, var(--bg-raised) 52%, var(--bg)), var(--bg) 90%);
+  transition: border-color 400ms var(--ease-silk), transform 400ms var(--ease-silk), background 400ms;
+}
+.module-card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 1.4rem;
+  width: 1.5rem;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.4;
+  transition: width 400ms var(--ease-silk), opacity 400ms;
+}
+.module-meta { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.75rem; letter-spacing: 0.18em; color: var(--fg-faint); }
+.module-ordinal { color: var(--accent); opacity: 0.65; }
+.module-content { position: relative; display: flex; flex: 1; flex-direction: column; padding-top: 2.75rem; }
+.module-mark {
+  position: absolute;
+  right: 0;
+  top: 0.3rem;
+  color: var(--accent);
+  font-size: 4rem;
+  line-height: 1.3;
+  opacity: 0.07;
+  transition: opacity 400ms, transform 500ms var(--ease-silk);
+}
+.glyph.module-name { position: relative; color: var(--fg); font-size: 1.3125rem; letter-spacing: 0.12em; transition: color 300ms; }
+.module-tagline { display: block; margin-top: 0.75rem; color: var(--fg-faint); font-size: 0.8125rem; line-height: 1.95; }
+.module-enter { display: flex; align-items: center; justify-content: space-between; margin-top: 1.65rem; color: var(--fg-faint); font-size: 0.75rem; letter-spacing: 0.16em; }
+.module-enter svg { opacity: 0.5; transition: transform 300ms, opacity 300ms; }
+.module-card:hover, .module-card:focus-visible {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--line));
+  transform: translateY(-4px);
+  background: linear-gradient(150deg, color-mix(in oklab, var(--accent) 6%, var(--bg-raised)), var(--bg) 90%);
+}
+.module-card:is(:hover, :focus-visible)::before { width: 3rem; opacity: 1; }
+.module-card:is(:hover, :focus-visible) .module-name,
+.module-card:is(:hover, :focus-visible) .module-enter { color: var(--accent); }
+.module-card:is(:hover, :focus-visible) .module-mark { opacity: 0.13; transform: translateY(-3px); }
+.module-card:is(:hover, :focus-visible) .module-enter svg { opacity: 1; transform: translateX(3px); }
+.collection-postscript { margin: 1.75rem 0 2rem; color: var(--fg-faint); font-size: 0.8125rem; letter-spacing: 0.08em; text-align: center; }
+
+.quiet-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.5rem;
+  border: 1px solid var(--line);
+  color: var(--fg-dim);
+  font-size: 0.9375rem;
+  letter-spacing: 0.2em;
+  transition: border-color 300ms, color 300ms;
+}
+.quiet-link:hover { border-color: var(--accent); color: var(--fg); }
+
+@media (min-width: 1600px) {
+  .home-hero { min-height: 23rem; }
+  .module-card { min-height: 18rem; }
+}
+@media (min-width: 641px) and (max-width: 1023px) {
+  .module-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .module-grid > div { grid-column: span 2; }
+  .module-grid > div:nth-child(n + 4) { grid-column: span 3; }
+  .module-card { min-height: 14.5rem; }
+  .module-content { padding-top: 1.75rem; }
+}
+@media (max-width: 640px) {
+  .header-inner { padding: 0 1.25rem; min-height: 4rem; }
+  .header-nav { gap: 1.4rem; }
+  .header-nav a { min-height: 4rem; font-size: 0.8125rem; }
+  .brand { gap: 0.5rem; font-size: 1rem; }
+  .brand-mark { width: 1.4rem; height: 1.6rem; font-size: 0.875rem; }
+  .home-page { padding: 0 1.25rem; }
+  .home-hero { min-height: 17.5rem; }
+  .hero-luopan svg { width: 278px; height: 278px; }
+  .glyph.hero-title { font-size: 3.875rem; }
+  .hero-eyebrow { font-size: 0.75rem; }
+  .hero-description { font-size: 0.875rem; margin-top: 1.4rem; letter-spacing: 0.08em; }
+  .hero-marginal { display: none; }
+  .hero-seal { left: calc(100% + 0.45rem); }
+  .collection-heading { gap: 1rem; margin-bottom: 1rem; }
+  .collection-note { display: none; }
+  .module-grid { grid-template-columns: 1fr; gap: 0.625rem; }
+  .module-card { min-height: 0; padding: 1.15rem 1.25rem; }
+  .module-card::before { left: 1.25rem; }
+  .module-meta { width: 100%; font-size: 0.75rem; }
+  .module-content { padding: 0.5rem 3rem 0 0; }
+  .glyph.module-name { font-size: 1.25rem; }
+  .module-tagline { font-size: 0.8125rem; margin-top: 0.3rem; }
+  .module-mark { right: 0.7rem; top: -0.1rem; font-size: 3.5rem; }
+  .module-enter { position: absolute; right: 1.25rem; top: 3.5rem; margin: 0; }
+  .module-enter > span { display: none; }
+  .collection-postscript { margin: 1.5rem 0 1.75rem; max-width: 20rem; margin-inline: auto; line-height: 1.9; }
+  .site-footer { margin: 0 1.25rem; justify-content: center; padding: 1.1rem 0; font-size: 0.6875rem; }
+  .footer-motto { display: none; }
+  .footer-principles { gap: 0.65rem; }
 }
 
 /* SVG SMIL 的时间轴在路由重挂载和页面休眠恢复时并不可靠。

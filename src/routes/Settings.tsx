@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { InkReveal } from '../ui/InkReveal'
-import { Rule } from '../ui/Rule'
 import { Seal } from '../ui/Seal'
 import { checkEndpoint } from '../llm/endpoint'
 import {
@@ -16,7 +15,7 @@ import {
 } from '../llm'
 
 const field =
-  'w-full bg-transparent border-0 border-b border-[var(--line)] px-0 py-2 text-[15px] ' +
+  'w-full bg-transparent border-0 border-b border-[var(--line)] px-0 py-3 text-[16px] ' +
   'text-[var(--fg)] outline-none focus:border-[var(--accent)] transition-colors duration-300 ' +
   'placeholder:text-[var(--fg-faint)]'
 
@@ -53,241 +52,260 @@ export function Settings() {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center px-6 py-10">
-      <div className="w-full max-w-[30rem]">
+    <div className="flex-1 flex flex-col items-center px-5 sm:px-8 py-10 sm:py-14">
+      <div className="w-full max-w-[46rem]">
         <InkReveal>
-          <h1 className="glyph text-[24px] tracking-[0.35em] indent-[0.35em] text-center mb-3">
-            设置
-          </h1>
-          <p className="text-center text-[13px] text-[var(--fg-faint)] leading-relaxed mb-12">
-            这个站没有后端。密钥与偏好只写进这台机器的浏览器，
-            <br />
-            解读时直接从你的浏览器发往下面这个地址，中间没有别人。
-          </p>
+          <header className="mb-9 sm:mb-12">
+            <p className="mb-3 text-[11px] tracking-[0.3em] text-[var(--accent)]">象见 · 设定</p>
+            <h1 className="glyph text-[32px] sm:text-[36px] tracking-[0.24em]">设置</h1>
+            <p className="mt-4 max-w-[34rem] text-[14px] leading-[1.9] text-[var(--fg-dim)]">
+              接通模型，余事自定。密钥与偏好只留在这个浏览器里，
+              解读时由浏览器直接发往你设定的地址。
+            </p>
+          </header>
         </InkReveal>
 
-        <InkReveal delay={0.15}>
-          <div className="mb-4 text-[12px] tracking-[0.3em] text-[var(--fg-dim)]">模型来路</div>
-          <div className="flex gap-px mb-9">
-            {(Object.keys(DEFAULTS) as ProviderId[]).map((p) => (
-              <button
-                key={p}
-                onClick={() => pickProvider(p)}
-                className={`flex-1 py-2.5 text-[14px] tracking-[0.2em] transition-all duration-400 cursor-pointer ${
-                  cred.provider === p
-                    ? 'text-[var(--accent)] shadow-[inset_0_-1px_0_var(--accent)]'
-                    : 'text-[var(--fg-faint)] shadow-[inset_0_-1px_0_var(--line)] hover:text-[var(--fg-dim)]'
-                }`}
-              >
-                {DEFAULTS[p].label}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-8">
-            <div>
-              <div className="text-[12px] tracking-[0.3em] text-[var(--fg-dim)] mb-1.5">密钥</div>
-              <input
-                type="password"
-                autoComplete="off"
-                spellCheck={false}
-                className={field}
-                placeholder={
-                  cred.provider === 'anthropic' ? 'sk-ant-…' : '本机模型通常留空即可'
-                }
-                value={cred.apiKey}
-                onChange={(e) => set('apiKey', e.target.value)}
-              />
-            </div>
-
-            <div>
-              <div className="text-[12px] tracking-[0.3em] text-[var(--fg-dim)] mb-1.5">
-                端点地址
+        <InkReveal delay={0.12}>
+          <form
+            className="form-surface px-5 py-7 sm:px-9 sm:py-9"
+            onSubmit={(event) => {
+              event.preventDefault()
+              if (!canSave || !check.ok) return
+              saveCredentials({ ...cred, baseUrl: check.isDefault ? '' : check.url }, prefs.remember)
+              savePrefs(prefs)
+              setSaved(true)
+            }}
+          >
+            <section aria-labelledby="endpoint-heading">
+              <div className="mb-7 flex items-baseline gap-3">
+                <span aria-hidden="true" className="text-[11px] text-[var(--accent)]">壹</span>
+                <h2 id="endpoint-heading" className="text-[16px] tracking-[0.18em]">模型来路</h2>
               </div>
-              <input
-                className={field}
-                placeholder={d.baseUrl}
-                value={cred.baseUrl}
-                onChange={(e) => set('baseUrl', e.target.value)}
-              />
-              {cred.provider === 'openai' && (
-                <p className="mt-2.5 text-[12px] leading-relaxed text-[var(--fg-faint)]">
-                  填任何讲 OpenAI 那套协议的地址：官方接口、中转网关，或本机模型。
-                  <br />
-                  本机 Ollama 要先放行跨域，否则浏览器发不出去：
-                  <br />
-                  <code className="text-[var(--fg-dim)]">OLLAMA_ORIGINS=* ollama serve</code>
-                  <br />
-                  <span className="opacity-75">
-                    另：从公网上的页面连本机模型多半会被浏览器的本地网络策略拦下，
-                    这条路请在自己机器上跑本项目时用。
-                  </span>
-                </p>
-              )}
-            </div>
 
-            <div>
-              <div className="text-[12px] tracking-[0.3em] text-[var(--fg-dim)] mb-1.5">模型</div>
-              <input
-                className={field}
-                placeholder={d.model}
-                value={cred.model}
-                onChange={(e) => set('model', e.target.value)}
-              />
-            </div>
-          </div>
-        </InkReveal>
-
-        <InkReveal delay={0.3}>
-          <div className="mt-10 py-4 border-y border-[var(--line)]">
-            <div className="text-[11px] tracking-[0.3em] text-[var(--fg-faint)] mb-1.5">
-              密钥将发往
-            </div>
-
-            {check.ok ? (
-              <>
-                <div className="text-[15px] break-all">
-                  <span className="text-[var(--fg-faint)]">{check.prefix}</span>
-                  <span className="text-[var(--accent)]">{check.host}</span>
-                  <span className="text-[var(--fg-faint)]">{check.suffix}</span>
+              <fieldset className="mb-8">
+                <legend className="mb-3 text-[12px] tracking-[0.18em] text-[var(--fg-dim)]">
+                  接口类型
+                </legend>
+                <div className="grid grid-cols-2 border border-[var(--line)]">
+                  {(Object.keys(DEFAULTS) as ProviderId[]).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      aria-pressed={cred.provider === p}
+                      onClick={() => pickProvider(p)}
+                      className={`min-h-12 px-2 py-3 text-[13px] sm:text-[14px] transition-colors duration-300 cursor-pointer ${
+                        cred.provider === p
+                          ? 'bg-[var(--accent)]/10 text-[var(--accent)] shadow-[inset_0_-1px_0_var(--accent)]'
+                          : 'text-[var(--fg-dim)] hover:bg-[var(--accent)]/5 hover:text-[var(--fg)]'
+                      }`}
+                    >
+                      {DEFAULTS[p].label}
+                    </button>
+                  ))}
                 </div>
-                <p className="mt-2 text-[12px] text-[var(--fg-faint)] leading-relaxed">
-                  这是全站唯一的出站地址。打开浏览器的网络面板可以核对：
-                  整个流程里再没有第二个域名。
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="text-[15px] text-[var(--seal)]">{check.message}</div>
-                {check.hint && (
-                  <p className="mt-2 text-[12px] text-[var(--fg-faint)]">{check.hint}</p>
+              </fieldset>
+
+              <div className="space-y-7">
+                <div>
+                  <label htmlFor="model-api-key" className="block text-[12px] tracking-[0.18em] text-[var(--fg-dim)]">
+                    密钥
+                  </label>
+                  <input
+                    id="model-api-key"
+                    type="password"
+                    autoComplete="off"
+                    spellCheck={false}
+                    className={field}
+                    placeholder={cred.provider === 'anthropic' ? 'sk-ant-…' : '本机模型通常留空即可'}
+                    value={cred.apiKey}
+                    onChange={(e) => set('apiKey', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="model-endpoint" className="block text-[12px] tracking-[0.18em] text-[var(--fg-dim)]">
+                    端点地址
+                  </label>
+                  <input
+                    id="model-endpoint"
+                    type="text"
+                    inputMode="url"
+                    autoComplete="off"
+                    spellCheck={false}
+                    aria-describedby="endpoint-destination"
+                    aria-invalid={!check.ok}
+                    className={field}
+                    placeholder={d.baseUrl}
+                    value={cred.baseUrl}
+                    onChange={(e) => set('baseUrl', e.target.value)}
+                  />
+                  {cred.provider === 'openai' && (
+                    <div className="mt-3 text-[12px] leading-[1.9] text-[var(--fg-faint)]">
+                      <p>支持 OpenAI 协议：官方接口、中转网关，或本机模型。</p>
+                      <details className="mt-2">
+                        <summary className="w-fit cursor-pointer text-[var(--fg-dim)] hover:text-[var(--accent)]">
+                          本机 Ollama 连接说明
+                        </summary>
+                        <div className="mt-3 space-y-2 border-l border-[var(--line)] pl-4">
+                          <p>本机 Ollama 要先放行跨域，否则浏览器发不出去：</p>
+                          <code className="block break-all text-[var(--fg-dim)]">OLLAMA_ORIGINS=* ollama serve</code>
+                          <p>
+                            从公网上的页面连本机模型多半会被浏览器的本地网络策略拦下，
+                            这条路请在自己机器上跑本项目时用。
+                          </p>
+                        </div>
+                      </details>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="model-name" className="block text-[12px] tracking-[0.18em] text-[var(--fg-dim)]">
+                    模型名称
+                  </label>
+                  <input
+                    id="model-name"
+                    autoComplete="off"
+                    spellCheck={false}
+                    className={field}
+                    placeholder={d.model}
+                    value={cred.model}
+                    onChange={(e) => set('model', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div id="endpoint-destination" className="mt-8 border-l-2 border-[var(--accent)]/50 pl-4 sm:pl-5" aria-live="polite">
+                <div className="mb-2 text-[11px] tracking-[0.18em] text-[var(--fg-dim)]">
+                  密钥与解读请求将发往
+                </div>
+                {check.ok ? (
+                  <>
+                    <div className="break-all text-[14px] sm:text-[15px]">
+                      <span className="text-[var(--fg-dim)]">{check.prefix}</span>
+                      <span className="text-[var(--accent)]">{check.host}</span>
+                      <span className="text-[var(--fg-dim)]">{check.suffix}</span>
+                    </div>
+                    <p className="mt-2 text-[12px] leading-[1.9] text-[var(--fg-faint)]">
+                      本站没有后端。这是全站唯一的出站地址，可在浏览器网络面板核对；
+                      解读流程中没有第二个域名。
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-[14px] text-[var(--seal)]">{check.message}</div>
+                    {check.hint && <p className="mt-2 text-[12px] text-[var(--fg-faint)]">{check.hint}</p>}
+                  </>
                 )}
-              </>
-            )}
-          </div>
+              </div>
 
-          {needsConfirm && check.ok && (
-            <label className="mt-6 flex items-start gap-3 cursor-pointer select-none">
-              <span
-                className={`w-3 h-3 mt-1.5 border shrink-0 transition-colors duration-300 ${
-                  confirmed ? 'bg-[var(--seal)] border-[var(--seal)]' : 'border-[var(--seal)]'
-                }`}
-              />
-              <input
-                type="checkbox"
-                className="sr-only"
-                checked={confirmed}
-                onChange={(e) => setConfirmedHost(e.target.checked ? check.host : null)}
-              />
-              <span className="text-[13px] leading-relaxed text-[var(--fg-dim)]">
-                我知道密钥会交给{' '}
-                <span className="text-[var(--accent)]">{check.host}</span>
-                <span className="block text-[12px] text-[var(--fg-faint)]">
-                  这不是模型厂商的官方地址。中转方能看到你的密钥和你问的每一句话，
-                  确认你信得过它。
-                </span>
-              </span>
-            </label>
-          )}
+              {needsConfirm && check.ok && (
+                <label className="mt-6 flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    className="mt-1.5 h-4 w-4 shrink-0 accent-[var(--seal)] cursor-pointer"
+                    checked={confirmed}
+                    onChange={(e) => setConfirmedHost(e.target.checked ? check.host : null)}
+                  />
+                  <span className="text-[13px] leading-[1.9] text-[var(--fg-dim)]">
+                    我知道密钥会交给 <span className="break-all text-[var(--accent)]">{check.host}</span>
+                    <span className="mt-1 block text-[12px] text-[var(--fg-faint)]">
+                      这不是模型厂商的官方地址。中转方能看到你的密钥和你问的每一句话，
+                      确认你信得过它。
+                    </span>
+                  </span>
+                </label>
+              )}
+            </section>
 
-          <label className="mt-8 flex items-start gap-3 cursor-pointer select-none">
-            <span
-              className={`w-3 h-3 mt-1.5 border shrink-0 transition-colors duration-300 ${
-                prefs.remember ? 'bg-[var(--accent)] border-[var(--accent)]' : 'border-[var(--line)]'
-              }`}
-            />
-            <input
-              type="checkbox"
-              className="sr-only"
-              checked={prefs.remember}
-              onChange={(e) => {
-                setPrefs((p) => ({ ...p, remember: e.target.checked }))
-                setSaved(false)
-              }}
-            />
-            <span className="text-[13px] leading-relaxed text-[var(--fg-dim)]">
-              记住密钥
-              <span className="block text-[12px] text-[var(--fg-faint)]">
-                不勾就只存到这个标签页关掉为止。
-              </span>
-            </span>
-          </label>
+            <section aria-labelledby="preferences-heading" className="mt-9 border-t border-[var(--line)] pt-7">
+              <div className="mb-6 flex items-baseline gap-3">
+                <span aria-hidden="true" className="text-[11px] text-[var(--accent)]">贰</span>
+                <h2 id="preferences-heading" className="text-[16px] tracking-[0.18em]">使用偏好</h2>
+              </div>
+              <div className="space-y-5">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    className="mt-1.5 h-4 w-4 shrink-0 accent-[var(--accent)] cursor-pointer"
+                    checked={prefs.remember}
+                    onChange={(e) => {
+                      setPrefs((p) => ({ ...p, remember: e.target.checked }))
+                      setSaved(false)
+                    }}
+                  />
+                  <span className="text-[14px] leading-[1.9] text-[var(--fg-dim)]">
+                    记住密钥
+                    <span className="mt-0.5 block text-[12px] text-[var(--fg-faint)]">
+                      保存在这个浏览器里；不勾选则关掉标签页即忘。
+                    </span>
+                  </span>
+                </label>
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    className="mt-1.5 h-4 w-4 shrink-0 accent-[var(--accent)] cursor-pointer"
+                    checked={prefs.paper}
+                    onChange={(e) => {
+                      const p = { ...prefs, paper: e.target.checked }
+                      setPrefs(p)
+                      savePrefs(p)
+                    }}
+                  />
+                  <span className="text-[14px] leading-[1.9] text-[var(--fg-dim)]">
+                    纸面模式
+                    <span className="mt-0.5 block text-[12px] text-[var(--fg-faint)]">换作宣纸底色，即时生效。</span>
+                  </span>
+                </label>
+              </div>
+            </section>
 
-          <label className="mt-5 flex items-start gap-3 cursor-pointer select-none">
-            <span
-              className={`w-3 h-3 mt-1.5 border shrink-0 transition-colors duration-300 ${
-                prefs.paper ? 'bg-[var(--accent)] border-[var(--accent)]' : 'border-[var(--line)]'
-              }`}
-            />
-            <input
-              type="checkbox"
-              className="sr-only"
-              checked={prefs.paper}
-              onChange={(e) => {
-                const p = { ...prefs, paper: e.target.checked }
-                setPrefs(p)
-                savePrefs(p)
-              }}
-            />
-            <span className="text-[13px] leading-relaxed text-[var(--fg-dim)]">纸面模式</span>
-          </label>
-
-          <div className="mt-10">
-            <Seal
-              className="w-full"
-              disabled={!canSave}
-              onClick={() => {
-                if (!check.ok) return
-                saveCredentials({ ...cred, baseUrl: check.isDefault ? '' : check.url }, prefs.remember)
-                savePrefs(prefs)
-                setSaved(true)
-              }}
-            >
-              {saved ? '已 记 下' : '记 下'}
-            </Seal>
-            {!canSave && (
-              <p className="mt-3 text-[12px] text-[var(--fg-faint)] text-center">
-                {check.ok ? '先确认上面那一条' : '端点地址还不能用'}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+              <Seal type="submit" className="w-full sm:w-auto sm:min-w-40" disabled={!canSave}>
+                {saved ? '已 记 下' : '记 下'}
+              </Seal>
+              <p role="status" className="text-[12px] leading-relaxed text-[var(--fg-faint)]">
+                {!canSave ? (check.ok ? '请先确认密钥将交给的地址。' : '端点地址还不能用。') : saved ? '设置已保存在这个浏览器里。' : '保存后，下一次解读将使用此配置。'}
               </p>
-            )}
-          </div>
-        </InkReveal>
-
-        <InkReveal delay={0.45}>
-          <Rule mark="焚" />
-          <p className="text-[13px] leading-relaxed text-[var(--fg-faint)] mb-5">
-            把这个站在本机留下的一切抹掉：密钥、偏好，一样不留。
-            命盘和解读本就只在内存里，不必清。
-          </p>
-          {burning ? (
-            <div className="flex gap-4">
-              <Seal
-                onClick={() => {
-                  burnEverything()
-                  location.href = '/'
-                }}
-              >
-                确 认 焚 毁
-              </Seal>
-              <Seal variant="quiet" onClick={() => setBurning(false)}>
-                算了
-              </Seal>
             </div>
-          ) : (
-            <Seal variant="quiet" onClick={() => setBurning(true)}>
-              焚 毁
-            </Seal>
-          )}
 
-          <div className="mt-14 text-center">
-            <Link
-              to="/"
-              className="text-[12px] tracking-[0.2em] text-[var(--fg-faint)] hover:text-[var(--fg-dim)] transition-colors duration-500"
-            >
-              返回
-            </Link>
-          </div>
+            <section aria-labelledby="burn-heading" className="mt-9 border-t border-[var(--line)] pt-7">
+              <div className="mb-4 flex items-baseline gap-3">
+                <span aria-hidden="true" className="text-[11px] text-[var(--accent)]">叁</span>
+                <h2 id="burn-heading" className="text-[16px] tracking-[0.18em]">焚毁留痕</h2>
+              </div>
+              <p className="mb-5 text-[12px] leading-[1.9] text-[var(--fg-faint)]">
+                抹掉本站在本机留下的密钥与偏好，一样不留。
+                命盘和解读本就只在内存里，不必清。
+              </p>
+              {burning ? (
+                <div className="flex flex-wrap gap-3">
+                  <Seal
+                    type="button"
+                    onClick={() => {
+                      burnEverything()
+                      location.href = '/'
+                    }}
+                  >
+                    确 认 焚 毁
+                  </Seal>
+                  <Seal type="button" variant="quiet" onClick={() => setBurning(false)}>算了</Seal>
+                </div>
+              ) : (
+                <Seal type="button" variant="quiet" onClick={() => setBurning(true)}>焚 毁</Seal>
+              )}
+            </section>
+          </form>
         </InkReveal>
+
+        <div className="mt-8">
+          <Link
+            to="/"
+            className="inline-flex py-2 text-[12px] tracking-[0.18em] text-[var(--fg-dim)] hover:text-[var(--accent)] transition-colors duration-300"
+          >
+            ← 返回门类
+          </Link>
+        </div>
       </div>
     </div>
   )
