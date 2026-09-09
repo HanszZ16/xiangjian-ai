@@ -17,15 +17,8 @@ export type ReadingState = {
 
 const EMPTY: ReadingState = { phase: 'idle', thinking: '', text: '', turns: [], error: null }
 
-export function useReading(
-  mod: DivinationModule,
-  impl: ModuleImpl,
-  chart: ChartBase,
-  localPreviewText = '',
-) {
-  const [state, setState] = useState<ReadingState>(() => localPreviewText
-    ? { phase: 'done', thinking: '', text: localPreviewText, turns: [], error: null }
-    : EMPTY)
+export function useReading(mod: DivinationModule, impl: ModuleImpl, chart: ChartBase) {
+  const [state, setState] = useState<ReadingState>(EMPTY)
   const abort = useRef<AbortController | null>(null)
 
   const run = useCallback(

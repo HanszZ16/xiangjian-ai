@@ -60,14 +60,14 @@ export function Cast() {
     }
   }
 
-  const submit = async (localPreview = false) => {
+  const submit = async () => {
     if (busy) return
     setNeedsModel(false)
     if (missing.length) {
       setError(`还差：${missing.join('、')}`)
       return
     }
-    if (!localPreview && !loadCredentials()) {
+    if (!loadCredentials()) {
       setError('先设好模型来路，先生才能为你解盘。')
       setNeedsModel(true)
       return
@@ -78,12 +78,7 @@ export function Cast() {
       const chart = impl.compute(values)
       // 命盘只走内存，不落任何存储；刷新即散
       nav('/reading', {
-        state: {
-          moduleId: mod.id,
-          chart,
-          question: values.question ?? '',
-          localPreview,
-        },
+        state: { moduleId: mod.id, chart, question: values.question ?? '' },
       })
     } catch (e) {
       setBusy(false)
@@ -121,7 +116,7 @@ export function Cast() {
           aria-busy={busy}
           onSubmit={(event) => {
             event.preventDefault()
-            void submit(false)
+            void submit()
           }}
         >
           <div className="grid grid-cols-1 gap-x-9 gap-y-7 sm:grid-cols-2 sm:gap-y-8">
@@ -149,16 +144,6 @@ export function Cast() {
             <Seal type="submit" disabled={busy} className="w-full sm:w-auto sm:min-w-48">
               {busy ? '排 盘 中' : '起 盘'}
             </Seal>
-            {import.meta.env.DEV && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void submit(true)}
-                className="mt-3 block w-full py-2 text-left text-[12px] tracking-[0.1em] text-[var(--fg-faint)] transition-colors duration-300 hover:text-[var(--accent)] disabled:opacity-35 sm:w-auto"
-              >
-                本地预览结果 · 不请求模型
-              </button>
-            )}
             <p className="mt-5 max-w-[36rem] text-[12px] leading-[1.9] text-[var(--fg-faint)]">
               生辰与所问先在本地排成盘，再交给你选定的模型解读。命盘不作留存，刷新即散。
             </p>

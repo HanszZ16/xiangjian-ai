@@ -11,9 +11,8 @@ import { InkReveal } from '../ui/InkReveal'
 import { Rule } from '../ui/Rule'
 import { Seal } from '../ui/Seal'
 import { downloadMarkdown, downloadPng } from '../lib/export'
-import { demoReadingFor } from '../reading/demo'
 
-type Handed = { moduleId: string; chart: ChartBase; question: string; localPreview?: boolean }
+type Handed = { moduleId: string; chart: ChartBase; question: string }
 
 type Verdict = '准' | '不准' | '记不清'
 
@@ -68,15 +67,7 @@ export function Reading() {
       </div>
     )
   }
-  return (
-    <Sheet
-      mod={mod}
-      impl={impl}
-      chart={handed.chart}
-      question={handed.question}
-      localPreview={Boolean(handed.localPreview)}
-    />
-  )
+  return <Sheet mod={mod} impl={impl} chart={handed.chart} question={handed.question} />
 }
 
 function Sheet({
@@ -84,28 +75,21 @@ function Sheet({
   impl,
   chart,
   question,
-  localPreview,
 }: {
   mod: NonNullable<ReturnType<typeof findModule>>
   impl: ModuleImpl
   chart: ChartBase
   question: string
-  localPreview: boolean
 }) {
-  const previewText = useMemo(
-    () => localPreview ? demoReadingFor(mod.id, chart, mod.sections) : '',
-    [localPreview, mod.id, mod.sections, chart],
-  )
-  const { state, open, follow, stop } = useReading(mod, impl, chart, previewText)
+  const { state, open, follow, stop } = useReading(mod, impl, chart)
   const started = useRef(false)
   const paper = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (started.current) return
     started.current = true
-    if (localPreview) return
     void open(question)
-  }, [open, question, localPreview])
+  }, [open, question])
 
   const sections = useMemo(
     () => splitSections(state.text, mod.sections),
@@ -200,7 +184,7 @@ function Sheet({
         <InkReveal>
           <header className="mb-9 sm:mb-12">
             <div className="mb-3 text-[11px] tracking-[0.3em] text-[var(--accent)]">
-              {mod.category ?? '观象'} · {localPreview ? '本地预览' : '已成盘'}
+              {mod.category ?? '观象'} · 已成盘
             </div>
             <h1 className="glyph text-[32px] sm:text-[36px] tracking-[0.24em] text-[var(--fg)]">
               {mod.name}
@@ -213,12 +197,6 @@ function Sheet({
         </InkReveal>
 
         <Rule mark="解" />
-
-        {localPreview && (
-          <div className="mx-auto mb-5 max-w-[46rem] border-l-2 border-[var(--accent)]/40 pl-4 text-[12px] leading-[1.9] text-[var(--fg-dim)]">
-            本地预览模式 · 命盘为真实计算，解读为界面示例，全程不读取密钥、不请求模型。
-          </div>
-        )}
 
         <div className="mx-auto max-w-[46rem]">
 
@@ -299,8 +277,7 @@ function Sheet({
                     </div>
                   </div>
                 ))}
-                {/* 本地预览这一页承诺过「不请求模型」，重校要走一次流式请求，就不能出现在这里。 */}
-                {hasVerdicts && !busy && !localPreview && (
+                {hasVerdicts && !busy && (
                   <div className="pt-6">
                     <Seal onClick={sendVerdicts}>据 此 重 校</Seal>
                   </div>
@@ -317,8 +294,8 @@ function Sheet({
         {/* ── 追问与留存 ── */}
         {state.phase === 'done' && (
           <InkReveal>
-            <Rule mark={localPreview ? '存' : '问'} />
-            {!localPreview && <div className="flex items-end gap-3 sm:gap-4">
+            <Rule mark="问" />
+            <div className="flex items-end gap-3 sm:gap-4">
               <textarea
                 aria-label="继续追问"
                 rows={1}
@@ -347,12 +324,9 @@ function Sheet({
               >
                 问
               </Seal>
-            </div>}
+            </div>
 
             <div className="mt-10 flex flex-wrap gap-3">
-              {localPreview && (
-                <Link to={`/cast/${mod.id}`} className="quiet-link">返回调整</Link>
-              )}
               <Seal variant="quiet" onClick={() => downloadMarkdown(mod.name, chart, state.text)}>
                 存为文稿
               </Seal>
