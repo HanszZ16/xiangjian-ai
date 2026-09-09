@@ -115,7 +115,6 @@ function Sheet({
 
   const [verdicts, setVerdicts] = useState<Record<string, Verdict>>({})
   const [ask, setAsk] = useState('')
-  const [activeSection, setActiveSection] = useState(0)
 
   // 等待期间的秒数。模型可能思考很久才吐出第一个字，没有这个读数，
   // 界面上就只有一个转着的盘，分不清是在想还是已经挂了。
@@ -195,23 +194,16 @@ function Sheet({
         )}
       </AnimatePresence>
 
-      <div ref={paper} className="reading-sheet w-full max-w-[76rem] px-4 py-7 sm:px-8 sm:py-10 lg:px-10">
+      <div ref={paper} className="reading-sheet w-full max-w-[64rem] px-4 py-7 sm:px-8 sm:py-10">
         {/* ── 命盘 ── */}
         <InkReveal>
           <div className="text-center mb-8">
             <div className="mb-2 text-[11px] tracking-[0.3em] text-[var(--accent)]">
               {mod.category ?? '观象'} · {localPreview ? '本地预览' : '已成盘'}
             </div>
-            <div className="flex items-center justify-center gap-4 sm:gap-6">
-              <span className="h-px w-12 bg-[var(--accent)]/50 sm:w-24" />
-              <h1 className="glyph text-[24px] sm:text-[30px] tracking-[0.3em] indent-[0.3em] text-[var(--fg)]">
-                {mod.name}
-              </h1>
-              <span className="grid h-6 w-6 place-items-center border border-[var(--seal)] text-[9px] text-[var(--seal)]">
-                {mod.mark}
-              </span>
-              <span className="h-px w-12 bg-[var(--accent)]/50 sm:w-24" />
-            </div>
+            <h1 className="glyph text-[24px] sm:text-[28px] tracking-[0.3em] indent-[0.3em] text-[var(--fg)]">
+              {mod.name}
+            </h1>
           </div>
           <div className="chart-surface p-4 sm:p-7">
             <ChartView chart={chart} />
@@ -226,34 +218,7 @@ function Sheet({
           </div>
         )}
 
-        <div className="mx-auto grid max-w-[62rem] gap-5 md:grid-cols-[8.5rem_minmax(0,1fr)] lg:grid-cols-[9.5rem_minmax(0,1fr)] lg:gap-6">
-          {sections.length > 0 && (
-            <aside className="hidden md:block">
-              <nav className="sticky top-24 border-l border-[var(--line)] py-2" aria-label="解读章节">
-                {sections.map((s, i) => s.title ? (
-                  <button
-                    key={`${s.title}-${i}`}
-                    type="button"
-                    onClick={() => {
-                      setActiveSection(i)
-                      document.getElementById(`reading-section-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                    }}
-                    className={`relative block w-full py-2.5 pl-5 text-left text-[12px] tracking-[0.08em] transition-colors duration-300 ${
-                      activeSection === i ? 'text-[var(--accent)]' : 'text-[var(--fg-faint)] hover:text-[var(--fg-dim)]'
-                    }`}
-                  >
-                    {activeSection === i && (
-                      <span className="absolute -left-[3px] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full border border-[var(--seal)] bg-[var(--bg)]" />
-                    )}
-                    <span className="mr-2 text-[9px] tabular-nums opacity-50">{String(i + 1).padStart(2, '0')}</span>
-                    {s.title}
-                  </button>
-                ) : null)}
-              </nav>
-            </aside>
-          )}
-
-          <div className="min-w-0">
+        <div className="mx-auto max-w-[46rem]">
 
         {/* ── 解读 ── */}
         {state.error && (
@@ -277,10 +242,8 @@ function Sheet({
 
         {sections.map((s, i) => (
           <section
-            id={`reading-section-${i}`}
             key={`${s.title}-${i}`}
-            className="reading-section scroll-mt-24 mb-3 px-5 py-6 sm:px-7 sm:py-7"
-            onPointerEnter={() => setActiveSection(i)}
+            className="reading-section mb-4 px-5 py-6 sm:px-7 sm:py-7"
           >
             {s.title && (
               <div className="mb-5 flex items-center gap-3">
@@ -379,15 +342,11 @@ function Sheet({
               </Seal>
             </div>}
 
-            <div className={`${localPreview ? '' : 'mt-12'} grid gap-3 sm:grid-cols-3`}>
-              {localPreview ? (
-                <Link to={`/cast/${mod.id}`} className="sm:col-span-1">
-                  <Seal className="w-full">返回调整</Seal>
+            <div className="mt-12 flex flex-wrap justify-center gap-4">
+              {localPreview && (
+                <Link to={`/cast/${mod.id}`}>
+                  <Seal variant="quiet">返回调整</Seal>
                 </Link>
-              ) : (
-                <Seal className="w-full" onClick={() => document.querySelector('textarea')?.focus()}>
-                  继续追问
-                </Seal>
               )}
               <Seal variant="quiet" onClick={() => downloadMarkdown(mod.name, chart, state.text)}>
                 存为文稿
@@ -395,13 +354,15 @@ function Sheet({
               <Seal variant="quiet" onClick={() => void downloadPng(paper.current, mod.name)}>
                 存为图卷
               </Seal>
+              <Link to="/">
+                <Seal variant="quiet">另起一盘</Seal>
+              </Link>
             </div>
             <p className="mt-8 text-center text-[12px] text-[var(--fg-faint)] leading-relaxed">
               这一页只活在此刻的浏览器里。刷新或关掉，它就散了。
             </p>
           </InkReveal>
         )}
-          </div>
         </div>
       </div>
     </div>
