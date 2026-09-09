@@ -38,7 +38,15 @@ type RingProps = {
  */
 function spinStyle(period: number, spinning: boolean): CSSProperties {
   return {
-    transformBox: 'view-box',
+    // 轴心用每圈自己的包围盒，不用 view-box。
+    //
+    // 这个盘的 viewBox 是 `-220 -220 440 440`，起点不在 0。配 view-box 时，
+    // Chrome 把 `center` 落在用户坐标 (220, 220)——viewBox 的右下角，不是圆心。
+    // 于是每圈字都绕着右下角转，转得越久甩得越远，久候的页面上尤其明显。
+    //
+    // 四圈都是偶数等分（24、12、10、8）且绕原点排布，180° 旋转下自身重合，
+    // 包围盒必然正中于圆心，所以 fill-box + center 精确落在轴上，且不看 viewBox 的脸色。
+    transformBox: 'fill-box',
     transformOrigin: 'center',
     animationName: 'luopan-spin',
     animationDuration: `${Math.abs(period)}s`,
