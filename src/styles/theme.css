@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* ── 象见 · 设计令牌 ───────────────────────────────────────────────
+   夜色下的星盘与宣纸。墨为底，朱砂为印，鎏金为文。
+   字体一律用系统自带的宋体族：零网络请求，且比任何网络字体都更"本地"。
+   ------------------------------------------------------------------ */
+
+@theme {
+  --font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC",
+    "Source Han Serif SC", "Noto Serif SC", "Iowan Old Style", Palatino,
+    Georgia, serif;
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    system-ui, -apple-system, sans-serif;
+
+  /* 墨 */
+  --color-void: #07080b;
+  --color-ink: #0b0e14;
+  --color-ink-raised: #141924;
+  --color-ink-line: #232a38;
+
+  /* 朱砂 · 鎏金 · 青玉 */
+  --color-cinnabar: #b2413a;
+  --color-cinnabar-lit: #cf5a50;
+  --color-gold: #c8a96a;
+  --color-gold-dim: #8a7647;
+  --color-jade: #5b8b85;
+
+  /* 宣纸 */
+  --color-paper: #ede6d6;
+  --color-paper-dim: #cfc7b4;
+
+  --ease-silk: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+:root {
+  --bg: var(--color-void);
+  --bg-raised: var(--color-ink-raised);
+  --line: var(--color-ink-line);
+  --fg: #d9d3c5;
+  --fg-dim: #8d8778;
+  --fg-faint: #5d594f;
+  --accent: var(--color-gold);
+  --seal: var(--color-cinnabar);
+  color-scheme: dark;
+}
+
+/* 纸面模式：宣纸上的墨字 */
+:root[data-mode="paper"] {
+  --bg: #e9e1cf;
+  --bg-raised: #f2ecdd;
+  --line: #ccc0a4;
+  --fg: #221e18;
+  --fg-dim: #5d5546;
+  --fg-faint: #8d8571;
+  --accent: #8a6d2f;
+  --seal: #a8322b;
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 纸纹：极低透明度的噪点，只在墨色模式下叠一层微光 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: color-mix(in oklab, var(--seal) 45%, transparent);
+  color: var(--fg);
+}
+
+/* 竖排小标题用 */
+.vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 0.4em;
+}
+
+/* 干支、宫位这类需要方正对齐的字 */
+.glyph {
+  font-family: var(--font-serif);
+  font-variant-east-asian: traditional;
+  letter-spacing: 0;
+}
+
+/* SVG SMIL 的时间轴在路由重挂载和页面休眠恢复时并不可靠。
+   罗盘改用 CSS transform，由 animation-play-state 控制启停。 */
+@keyframes luopan-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.destiny-particles {
+  opacity: 0.56;
+  transition: opacity 800ms var(--ease-silk);
+}
+
+:root[data-mode="paper"] .destiny-particles {
+  opacity: 0.38;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .destiny-particles {
+    display: none;
+  }
+}

@@ -1,0 +1,31 @@
+node_modules
+dist
+*.local
+.DS_Store
+
+# 本机密钥、证书与部署状态不得进入公开仓库
+.env
+.env.*
+!.env.example
+.npmrc
+.netrc
+.pypirc
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# 生产域名、主机、Web 根目录等部署细节只保留在私有环境
+deploy/
+.deployment/
+
+# 紫微那几份参考资料的来源仓库没有声明任何 license（无 LICENSE 文件，
+# GitHub 也识别为未声明），默认即保留全部权利。留在本机当选题参照可以，
+# 放进仓库就等于替人重新分发，所以不提交。
+# 详见 src/knowledge/CREDITS.md。
+src/knowledge/vendor/ziwei/
