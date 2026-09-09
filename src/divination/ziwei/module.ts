@@ -25,6 +25,7 @@ const mod: DivinationModule<ZiweiValues, ZiweiChart> = {
   id: 'ziwei',
   name: '紫微斗数',
   tagline: '布十二宫以观星曜四化与大限流年',
+  category: '星命',
   mark: '斗',
   sections: ZIWEI_SECTIONS,
 

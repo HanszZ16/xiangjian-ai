@@ -74,6 +74,125 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+/* 共同表面：仍是直角宣纸，不把每一块都做成常见的圆角卡片。 */
+.module-card,
+.form-surface,
+.chart-surface,
+.reading-section {
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--bg-raised) 72%, transparent), transparent 78%);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.module-card::before,
+.form-surface::before,
+.chart-surface::before {
+  content: "";
+  display: block;
+  position: absolute;
+  pointer-events: none;
+}
+
+.module-card {
+  transition: transform 500ms var(--ease-silk), box-shadow 500ms var(--ease-silk), background 500ms var(--ease-silk);
+}
+
+.module-card:hover,
+.module-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 55%, var(--line)), 0 18px 50px rgb(0 0 0 / 12%);
+  outline: none;
+}
+
+.form-surface,
+.chart-surface,
+.reading-sheet {
+  position: relative;
+}
+
+.form-surface::before,
+.chart-surface::before {
+  inset: 0 auto auto 0;
+  width: 4.5rem;
+  height: 1px;
+  background: var(--accent);
+}
+
+.reading-sheet {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--bg-raised) 34%, transparent), transparent 16rem),
+    color-mix(in oklab, var(--bg) 88%, var(--bg-raised));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 22%, var(--line)),
+    0 28px 100px rgb(0 0 0 / 24%);
+}
+
+.reading-sheet::before,
+.reading-sheet::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 7rem;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+.reading-sheet::before {
+  left: 0;
+}
+
+.reading-sheet::after {
+  right: 0;
+}
+
+.reading-section {
+  transition: border-color 400ms var(--ease-silk);
+}
+
+.reading-section:hover {
+  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--accent) 55%, transparent), inset 0 0 0 1px var(--line);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.mystic-backdrop {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--accent) 6%, transparent), transparent 42%),
+    radial-gradient(circle at 12% 58%, color-mix(in oklab, var(--seal) 4%, transparent), transparent 16%),
+    radial-gradient(circle at 89% 72%, color-mix(in oklab, var(--accent) 4%, transparent), transparent 18%);
+}
+
+.mystic-halo {
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--accent) 8%, transparent), transparent 64%);
+}
+
+.mystic-orbit {
+  border: 1px solid color-mix(in oklab, var(--accent) 9%, transparent);
+  box-shadow: inset 0 0 80px color-mix(in oklab, var(--accent) 2%, transparent);
+}
+
+:root[data-mode="paper"] .mystic-backdrop {
+  opacity: 0.42;
+}
+
+@media (max-width: 640px) {
+  .reading-sheet {
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+}
+
 /* 纸纹：极低透明度的噪点，只在墨色模式下叠一层微光 */
 body::before {
   content: "";

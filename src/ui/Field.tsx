@@ -26,7 +26,7 @@ const input =
 function Label({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
     <div className="mb-1.5">
-      <div className="text-[12px] tracking-[0.3em] text-[var(--fg-dim)]">{children}</div>
+      <div className="text-[13px] tracking-[0.24em] text-[var(--fg-dim)]">{children}</div>
       {hint && <div className="mt-1 text-[12px] text-[var(--fg-faint)]">{hint}</div>}
     </div>
   )
@@ -129,13 +129,34 @@ export function Field({
   const v = values[spec.name]
 
   switch (spec.kind) {
+    case 'section':
+      return (
+        <div className="field-section pt-2">
+          <div className="flex items-center gap-3">
+            <span className="glyph grid h-8 w-8 shrink-0 place-items-center border border-[var(--accent)]/45 text-[13px] text-[var(--accent)]">
+              {spec.mark ?? '录'}
+            </span>
+            <div>
+              <h2 className="glyph text-[17px] tracking-[0.22em] text-[var(--fg)]">
+                {spec.label}
+              </h2>
+              {spec.hint && (
+                <p className="mt-0.5 text-[12px] leading-relaxed text-[var(--fg-faint)]">
+                  {spec.hint}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )
+
     case 'choice': {
-      // 三个以内并排；再多就排成网格，免得字被挤成一条
+      // 选项多时在手机两列、宽屏四列，八方等长选项不再挤成三行。
       const wide = spec.options.length > 3
       return (
         <div>
           <Label hint={spec.hint}>{spec.label}</Label>
-          <div className={wide ? 'grid grid-cols-3 gap-px' : 'flex gap-px'}>
+          <div className={wide ? 'grid grid-cols-2 sm:grid-cols-4 gap-px' : 'flex gap-px'}>
             {spec.options.map((o) => {
               const on = (v ?? spec.defaultValue) === o.value
               return (

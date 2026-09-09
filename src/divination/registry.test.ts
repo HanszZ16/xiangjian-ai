@@ -5,7 +5,7 @@ import { buildOpening, buildSystem } from '../prompt/assemble'
 import type { FormValues } from './types'
 
 /* 模块拆成了「元信息」与「实作」两半，实作按需加载。
-   这条测试把三个模块各自完整地走一遍：加载 → 排盘 → 装配提示，
+   这条测试把所有模块各自完整地走一遍：加载 → 排盘 → 装配提示，
    免得哪个模块的动态 import 写错了要等到线上点开才发现。 */
 
 const INPUTS: Record<string, FormValues> = {
@@ -25,12 +25,22 @@ const INPUTS: Record<string, FormValues> = {
     question: '',
   },
   tarot: { spread: 'three', question: '这段关系还要不要继续' },
+  yinyuan: {
+    mode: 'bazi',
+    aName: '甲', aGender: '男', aDate: '1990-05-15', aTime: '12:00', aHourUnknown: false, aPlace: '',
+    bName: '乙', bGender: '女', bDate: '1992-08-20', bTime: '09:30', bHourUnknown: false, bPlace: '',
+    question: '两个人遇事节奏不同，如何磨合',
+  },
+  fengshui: {
+    facing: '南', completedDate: '2018-06-01', residentGender: '男',
+    residentBirthDate: '1985-05-01', focus: '事业', layout: '书房在东', question: '书桌如何安排',
+  },
 }
 
 describe('模块注册表', () => {
-  it('三个门类都挂上了，id 与元信息齐全', () => {
+  it('五个门类都挂上了，id 与元信息齐全', () => {
     const ids = allModules().map((m) => m.id)
-    expect(ids).toEqual(['bazi', 'ziwei', 'tarot'])
+    expect(ids).toEqual(['bazi', 'ziwei', 'yinyuan', 'fengshui', 'tarot'])
     for (const m of allModules()) {
       expect(m.name).toBeTruthy()
       expect(m.tagline).toBeTruthy()

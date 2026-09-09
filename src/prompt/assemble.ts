@@ -26,6 +26,6 @@ export function buildOpening(chart: ChartBase, question: string | undefined): st
     '━━━━━ 盘 ━━━━━',
     chart.digest,
     '',
-    q ? `命主所问：${q}\n\n八节都要写，但与所问相关的那几节多着些笔墨。` : '命主没有特别要问的，通盘看一遍即可。',
+    q ? `命主所问：${q}\n\n既定各节都要写，但与所问相关的那几节多着些笔墨。` : '命主没有特别要问的，通盘看一遍即可。',
   ].join('\n')
 }
