@@ -1,5 +1,5 @@
 /**
- * 三个门类共用的一份护栏与语气规范。
+ * 各门类共用的一份护栏与语气规范。
  *
  * 反巴纳姆、主权归用户、叙事结构这几条，思路取自
  * daman-ovo-0404/tarot-skill 的 SKILL.md（MIT），详见 knowledge/CREDITS.md。

@@ -10,6 +10,7 @@ const mod: DivinationModule<TarotValues, TarotChart> = {
   id: 'tarot',
   name: '塔罗牌',
   tagline: '洗牌切牌以照见当下的处境与去路',
+  category: '占卜',
   mark: '牌',
   sections: TAROT_SECTIONS,
 

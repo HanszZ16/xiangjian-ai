@@ -1,7 +1,19 @@
 import type { ComponentType } from 'react'
 
 /** 声明式表单字段。Cast 页照着渲染，模块不碰 UI 代码。 */
-export type FieldSpec =
+type FieldVisibility = {
+  /** 只在另一个字段取到指定值时显示，供多路径表单使用。 */
+  visibleWhen?: { name: string; equals: string | boolean }
+}
+
+export type FieldSpec = FieldVisibility & (
+  | {
+      kind: 'section'
+      name: string
+      label: string
+      hint?: string
+      mark?: string
+    }
   | {
       kind: 'choice'
       name: string
@@ -30,6 +42,7 @@ export type FieldSpec =
       multiline?: boolean
       optional?: boolean
     }
+)
 
 export type FormValues = Record<string, string | boolean>
 
@@ -64,6 +77,8 @@ export interface DivinationModule<I extends FormValues = FormValues, C extends C
   name: string
   /** 首页上的一句话 */
   tagline: string
+  /** 首页卡片上的门类小签 */
+  category?: string
   /** 首页序号旁的一个字 */
   mark: string
   fields: FieldSpec[]

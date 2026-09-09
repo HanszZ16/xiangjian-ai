@@ -39,6 +39,18 @@
 紫微的方法论写在 `src/divination/ziwei/impl.ts` 的角色提示里，是依据公有领域的
 斗数通行说法自行编写的。将来若要补知识条目，同样依古籍原典另写，不照抄他人整理稿。
 
+## yinyuan/ 与 fengshui/
+
+功能范围与交互结构参考了
+[Ming-H/yinyuan-skills](https://github.com/Ming-H/yinyuan-skills) 和
+[voidforall/fengshui.skill](https://github.com/voidforall/fengshui.skill)。两者在本项目开发时
+均未声明可复用 license，因此没有复制其 `SKILL.md` 或 `references/` 文本，也没有把原文件
+打包进本站。
+
+姻缘合参的天干五合、地支合冲刑害、五行生克，以及阳宅八宅的命卦、宅卦、游年表，
+都属于公有领域的传统术数规则；本项目据这些通行规则重新编写了确定性计算、解释边界与界面。
+风水模块有意只做到八方级初筛：缺少实测罗盘度数与户型图时，不伪造二十四山玄空飞星精盘。
+
 ## 城市经纬度
 
 `src/data/cities.json` 由 `scripts/build-cities.mjs` 从

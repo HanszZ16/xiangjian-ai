@@ -2,7 +2,8 @@ export type Section = { title: string; body: string }
 
 /** 把流式长文按 `## 节名` 切成章。未及闭合的最后一章照样返回，好让它边写边显。 */
 export function splitSections(text: string, expected: string[]): Section[] {
-  const parts = text.split(/^##[ \t]*/m)
+  // 只切二级标题；`### 小标题` 必须留在正文里交给 Prose 渲染。
+  const parts = text.split(/^##(?!#)[ \t]*/m)
   const out: Section[] = []
 
   for (const part of parts) {

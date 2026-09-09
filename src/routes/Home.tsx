@@ -1,6 +1,5 @@
 import { lazy, Suspense, useState } from 'react'
 import { Link } from 'react-router'
-import { motion } from 'motion/react'
 import { Luopan } from '../ui/Luopan'
 import { InkReveal } from '../ui/InkReveal'
 import { allModules } from '../divination/registry'
@@ -12,7 +11,7 @@ const DestinyParticles = lazy(() => import('../ui/DestinyParticles').then((modul
 })))
 
 function patternFor(moduleId: string): DestinyPattern {
-  if (moduleId === 'bazi') return 'bazi'
+  if (moduleId === 'bazi' || moduleId === 'yinyuan') return 'bazi'
   if (moduleId === 'ziwei') return 'ziwei'
   if (moduleId === 'tarot') return 'tarot'
   return 'luopan'
@@ -23,74 +22,79 @@ export function Home() {
   const [pattern, setPattern] = useState<DestinyPattern>('luopan')
 
   return (
-    // justify-content 用 safe center：内容一旦高过视口，普通的 center
-    // 会把顶端顶到视口之外，怎么往上滚都见不到标题。
-    <div className="relative isolate flex-1 flex flex-col items-center [justify-content:safe_center] overflow-x-hidden px-6 py-6 select-none">
-      <Suspense fallback={null}>
-        <DestinyParticles pattern={pattern} />
-      </Suspense>
-
-      {/* 盘在字后面缓缓地转 */}
-      <div className="relative z-10 flex items-center justify-center">
-        <motion.div
-          className="absolute"
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 0.42, scale: 1 }}
-          transition={{ duration: 3.2, ease: [0.22, 0.61, 0.36, 1] }}
-        >
-          <Luopan size={350} spinning centerGlyph={false} className="max-w-[80vw] max-h-[80vw]" />
-        </motion.div>
-
-        <div className="relative text-center py-16">
-          <InkReveal delay={0.6}>
-            <h1 className="glyph text-[56px] sm:text-[72px] leading-none tracking-[0.18em] indent-[0.18em] text-[var(--fg)]">
-              象见
-            </h1>
-          </InkReveal>
-          <InkReveal delay={1.3}>
-            <p className="mt-6 text-[13px] tracking-[0.5em] indent-[0.5em] text-[var(--fg-faint)]">
-              观 象 见 微
-            </p>
-          </InkReveal>
-        </div>
+    <div className="home-page">
+      <div className="home-atmosphere" aria-hidden="true">
+        <Suspense fallback={null}>
+          <DestinyParticles pattern={pattern} />
+        </Suspense>
       </div>
 
-      <InkReveal delay={2}>
-        <p className="relative z-10 mt-2 mb-10 max-w-[30rem] text-center text-[15px] leading-[2.2] text-[var(--fg-dim)]">
-          此处不预言吉凶，只把你出生那一刻的天地格局如实排出，
-          <br className="hidden sm:block" />
-          再请先生说一说它的意思。
-        </p>
-      </InkReveal>
-
-      <nav className="relative z-10 w-full max-w-[30rem]">
-        {modules.map((m, i) => (
-          <InkReveal key={m.id} delay={2.4 + i * 0.22}>
-            <Link
-              to={`/cast/${m.id}`}
-              onPointerEnter={() => setPattern(patternFor(m.id))}
-              onPointerLeave={() => setPattern('luopan')}
-              onFocus={() => setPattern(patternFor(m.id))}
-              onBlur={() => setPattern('luopan')}
-              className="group flex items-baseline gap-5 py-5 border-t border-[var(--line)] last:border-b
-                         transition-colors duration-500 hover:border-[var(--accent)]"
-            >
-              <span className="glyph text-[12px] text-[var(--fg-faint)] w-4 shrink-0">
-                {ORDINAL[i]}
-              </span>
-              <span className="flex-1">
-                <span className="glyph block text-[19px] tracking-[0.25em] text-[var(--fg)] group-hover:text-[var(--accent)] transition-colors duration-500">
-                  {m.name}
-                </span>
-                <span className="block mt-1 text-[13px] text-[var(--fg-faint)]">{m.tagline}</span>
-              </span>
-              <span className="glyph text-[15px] text-[var(--fg-faint)] group-hover:text-[var(--seal)] transition-colors duration-500">
-                {m.mark}
-              </span>
-            </Link>
+      <section className="home-hero" aria-labelledby="home-title">
+        <div className="hero-marginal hero-marginal-left" aria-hidden="true">
+          <span className="vertical">万物有象</span><span className="marginal-line" />
+        </div>
+        <div className="hero-luopan" aria-hidden="true">
+          <Luopan size={324} spinning centerGlyph={false} />
+        </div>
+        <div className="hero-copy">
+          <InkReveal>
+            <p className="hero-eyebrow">观 象 见 微</p>
+            <div className="hero-title-row">
+              <h1 id="home-title" className="glyph hero-title">象见</h1>
+              <span className="hero-seal" aria-hidden="true">观<br />象</span>
+            </div>
           </InkReveal>
-        ))}
-      </nav>
+          <InkReveal delay={0.12}>
+            <p className="hero-description">不预言吉凶，只为看清此刻。</p>
+          </InkReveal>
+        </div>
+        <div className="hero-marginal hero-marginal-right" aria-hidden="true">
+          <span className="marginal-line" /><span className="vertical">静中见微</span>
+        </div>
+      </section>
+
+      <section className="home-collection" aria-labelledby="collection-title">
+        <InkReveal delay={0.18}>
+          <div className="collection-heading">
+            <h2 id="collection-title">择一门 · 观一象</h2>
+            <span className="collection-rule" />
+            <span className="collection-note">起盘有据，解读有引</span>
+          </div>
+        </InkReveal>
+        <nav className="module-grid" aria-label="术数门类">
+          {modules.map((m, i) => (
+            <InkReveal key={m.id} delay={0.22 + i * 0.06}>
+              <Link
+                to={`/cast/${m.id}`}
+                onPointerEnter={() => setPattern(patternFor(m.id))}
+                onPointerLeave={() => setPattern('luopan')}
+                onFocus={() => setPattern(patternFor(m.id))}
+                onBlur={() => setPattern('luopan')}
+                className="module-card"
+              >
+                <span className="module-meta">
+                  <span>{m.category ?? '观象'}</span>
+                  <span className="module-ordinal" aria-hidden="true">{ORDINAL[i] ?? i + 1}</span>
+                </span>
+                <span className="module-content">
+                  <span className="module-mark glyph" aria-hidden="true">{m.mark}</span>
+                  <span className="module-name glyph">{m.name}</span>
+                  <span className="module-tagline">{m.tagline}</span>
+                </span>
+                <span className="module-enter" aria-hidden="true">
+                  <span>入卷</span>
+                  <svg width="28" height="12" viewBox="0 0 28 12" fill="none">
+                    <path d="M1 6H26M21 1L26 6L21 11" stroke="currentColor" strokeWidth="1" />
+                  </svg>
+                </span>
+              </Link>
+            </InkReveal>
+          ))}
+        </nav>
+        <InkReveal delay={0.5}>
+          <p className="collection-postscript">以本地排盘为本，请你选择的模型，为此刻的所问作解。</p>
+        </InkReveal>
+      </section>
     </div>
   )
 }

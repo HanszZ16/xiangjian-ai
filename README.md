@@ -2,7 +2,7 @@
 
 观象见微。一个不留痕迹的 AI 术数站：**排盘在本地算，解读交给你自己的模型。**
 
-目前有三门：八字命理、紫微斗数、塔罗牌。
+目前有五门：八字命理、紫微斗数、姻缘合参、阳宅八宅、塔罗牌。
 
 ---
 
@@ -58,7 +58,7 @@ src/
 │   │                   ModuleImpl（排盘与画盘，按需加载）
 │   ├── registry.ts
 │   ├── modules.ts      装配点：import 一下就挂上了
-│   └── bazi|ziwei|tarot/
+│   └── bazi|ziwei|yinyuan|fengshui|tarot/
 │         module.ts     元信息 + 声明式表单 + load()
 │         impl.ts       角色提示 + compute + ChartView
 │         compute.ts    纯函数、确定性、零网络
@@ -80,7 +80,7 @@ src/
 
 写一个目录，实现 `DivinationModule` 与 `ModuleImpl`，在 `modules.ts` 里 import 一行。
 首页、表单、路由、流式解读、导出全都自动接上，不必改 UI 代码。
-六爻、奇门、合婚、风水都可以照这个形状加。
+六爻、奇门等门类也可以照这个形状加。
 
 ---
 

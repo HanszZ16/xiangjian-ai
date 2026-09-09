@@ -21,6 +21,13 @@ describe('切章', () => {
     expect(s[0].title).toBe('')
     expect(s[1].title).toBe('日主旺衰')
   })
+
+  it('三级标题留在所属章节，不误切成新章', () => {
+    const out = splitSections('## 趋吉之道\n\n### 今天可做\n\n先整理桌面。', ['趋吉之道'])
+    expect(out).toHaveLength(1)
+    expect(out[0].title).toBe('趋吉之道')
+    expect(out[0].body).toContain('### 今天可做')
+  })
 })
 
 describe('印证条目', () => {

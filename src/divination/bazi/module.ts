@@ -26,6 +26,7 @@ const mod: DivinationModule<BaziValues, BaziChart> = {
   id: 'bazi',
   name: '八字命理',
   tagline: '以生辰四柱推五行格局与一生大运',
+  category: '命理',
   mark: '柱',
   sections: BAZI_SECTIONS,
 

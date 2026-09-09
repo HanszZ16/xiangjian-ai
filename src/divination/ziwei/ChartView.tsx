@@ -48,7 +48,7 @@ function Cell({ p, area, current }: { p: Palace | undefined; area: string; curre
 
   return (
     <div
-      className="relative p-2 flex flex-col min-h-[118px] transition-colors duration-500"
+      className="relative p-1.5 sm:p-2 flex flex-col min-h-[132px] transition-colors duration-500"
       style={{
         gridArea: area,
         boxShadow: `inset 0 0 0 1px ${current ? 'var(--seal)' : 'var(--line)'}`,
@@ -70,19 +70,19 @@ function Cell({ p, area, current }: { p: Palace | undefined; area: string; curre
         {p.adjectiveStars.map((s) => s.name).join(' ')}
       </div>
 
-      <div className="mt-1.5 flex items-baseline justify-between">
-        <span className="text-[9.5px] text-[var(--fg-faint)] tabular-nums">
+      <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+        <span className="whitespace-nowrap text-[10px] text-[var(--fg-faint)] tabular-nums">
           {p.decadal ? `${p.decadal[0]}–${p.decadal[1]}` : ''}
         </span>
-        <span className="flex items-baseline gap-1">
+        <span className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5">
           <span
-            className="glyph text-[12px]"
+            className="glyph whitespace-nowrap text-[12px]"
             style={{ color: p.name === '命宫' ? 'var(--accent)' : 'var(--fg-dim)' }}
           >
             {p.name}
             {p.isBody && <span className="text-[9px] text-[var(--seal)]">身</span>}
           </span>
-          <span className="glyph text-[10px] text-[var(--fg-faint)]">
+          <span className="glyph whitespace-nowrap text-[10px] text-[var(--fg-faint)]">
             {p.stem}
             {p.branch}
           </span>
@@ -118,7 +118,7 @@ export function ZiweiChartView({ chart }: { chart: ZiweiChart }) {
 
         {/* 中宫 */}
         <div
-          className="p-4 flex flex-col justify-center gap-2 text-[12px] leading-relaxed"
+          className="p-2.5 sm:p-4 flex flex-col justify-center gap-2 text-[12px] leading-relaxed"
           style={{
             gridArea: '2 / 2 / 4 / 4',
             boxShadow: 'inset 0 0 0 1px var(--line)',

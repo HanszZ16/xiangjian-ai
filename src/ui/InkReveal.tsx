@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 
 /** 墨迹晕开：内容自下浮起并由淡转浓。 */
 export function InkReveal({
@@ -11,12 +11,13 @@ export function InkReveal({
   delay?: number
   className?: string
 }) {
+  const reducedMotion = useReducedMotion()
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
-      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      transition={{ duration: 1.1, delay, ease: [0.22, 0.61, 0.36, 1] }}
+      initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reducedMotion ? 0 : 0.65, delay: reducedMotion ? 0 : delay, ease: [0.22, 0.61, 0.36, 1] }}
     >
       {children}
     </motion.div>
